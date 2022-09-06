@@ -67,12 +67,44 @@ export class AppController {
   }
 
   @Put(':id')
-  UpdateReportById() {
-    return 'Updated';
+  UpdateReportById(
+    @Body() { amount, source }: { amount: number; source: string },
+    @Param('type') type: string,
+    @Param('id') id: string,
+  ) {
+    if (type === ReportType.INCOME || type === ReportType.EXPENSE) {
+      const updatedReport = data.report.map((item) => {
+        if (item.id === id) {
+          const newReport = {
+            ...item,
+            source: source ? source : item.source,
+            amount: amount ? amount : item.amount,
+            updated_at: new Date(),
+          };
+
+          return newReport;
+        }
+
+        return item;
+      });
+
+      return updatedReport;
+    }
+
+    throw notFound;
   }
 
   @Delete(':id')
-  DeleteReportById() {
-    return 'Deleted';
+  DeleteReportById(@Param('type') type: string, @Param('id') id: string) {
+    if (type === ReportType.INCOME || type === ReportType.EXPENSE) {
+      data.report.filter((item) => {
+        console.log(item.id, id);
+        item.id === id;
+      });
+
+      return 'item deleted';
+    }
+
+    throw notFound;
   }
 }
