@@ -1,5 +1,3 @@
-import { v4 as uuid } from 'uuid';
-
 export enum ReportType {
   INCOME = 'income',
   EXPENSE = 'expense',
@@ -7,7 +5,7 @@ export enum ReportType {
 
 interface Data {
   report: {
-    id: typeof uuid | string;
+    id: string;
     source: string;
     amount: number;
     created_at: Date;

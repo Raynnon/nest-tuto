@@ -50,7 +50,7 @@ export class AppController {
   ) {
     if (type === ReportType.INCOME || type === ReportType.EXPENSE) {
       const newReport = {
-        id: uuid,
+        id: uuid(),
         source,
         amount,
         created_at: new Date(),
@@ -60,7 +60,7 @@ export class AppController {
 
       data.report.push(newReport);
 
-      return 'created';
+      return newReport;
     }
 
     throw notFound;
