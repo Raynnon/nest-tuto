@@ -68,12 +68,12 @@ export class AppController {
 
   @Put(':id')
   UpdateReportById(
-    @Body() { amount, source }: { amount: number; source: string },
     @Param('type') type: string,
     @Param('id') id: string,
+    @Body() { amount, source }: { amount: number; source: string },
   ) {
     if (type === ReportType.INCOME || type === ReportType.EXPENSE) {
-      const updatedReport = data.report.map((item) => {
+      const updatedReport = data.report.map((item, index) => {
         if (item.id === id) {
           const newReport = {
             ...item,
@@ -88,7 +88,8 @@ export class AppController {
         return item;
       });
 
-      return updatedReport;
+      data.report = updatedReport;
+      return data.report;
     }
 
     throw notFound;
@@ -97,12 +98,12 @@ export class AppController {
   @Delete(':id')
   DeleteReportById(@Param('type') type: string, @Param('id') id: string) {
     if (type === ReportType.INCOME || type === ReportType.EXPENSE) {
-      data.report.filter((item) => {
-        console.log(item.id, id);
-        item.id === id;
+      const updatedReport = data.report.filter((item) => {
+        return item.id !== id;
       });
 
-      return 'item deleted';
+      data.report = updatedReport;
+      return data.report;
     }
 
     throw notFound;
