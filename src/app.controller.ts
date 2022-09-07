@@ -9,35 +9,32 @@ import {
   HttpStatus,
   Body,
 } from '@nestjs/common';
-import { data, ReportType } from './data';
-import { v4 as uuid } from 'uuid';
+import { AppService } from './app.service';
+import { ReportType } from './data';
+
+const doesTypeExists = (type: ReportType): boolean => {
+  return Object.values(ReportType).includes(type) ? true : false;
+};
 
 const notFound = new HttpException('Not Found', HttpStatus.NOT_FOUND);
-const filteredType = (type: string) => {
-  if (type === ReportType.INCOME || type === ReportType.EXPENSE) {
-    return data.report.filter((report) => {
-      return report.type === type;
-    });
-  }
-
-  throw notFound;
-};
 
 @Controller('/report/:type')
 export class AppController {
+  constructor(private readonly appService: AppService) {}
+
   @Get()
-  getAllReports(@Param('type') type: string) {
-    return filteredType(type);
+  getAllReports(@Param('type') type: ReportType) {
+    if (doesTypeExists(type)) {
+      return this.appService.getAllReports(type);
+    }
+
+    return notFound;
   }
 
   @Get(':id')
-  getReportById(@Param('type') type: string, @Param('id') id: string) {
-    const filteredReport = filteredType(type).find(
-      (report) => report.id === id,
-    );
-
-    if (filteredReport) {
-      return filteredReport;
+  getReportById(@Param('type') type: ReportType, @Param('id') id: string) {
+    if (doesTypeExists(type)) {
+      return this.appService.getReportById(id);
     }
 
     throw notFound;
@@ -46,21 +43,10 @@ export class AppController {
   @Post()
   createReport(
     @Body() { amount, source }: { amount: number; source: string },
-    @Param('type') type: string,
+    @Param('type') type: ReportType,
   ) {
-    if (type === ReportType.INCOME || type === ReportType.EXPENSE) {
-      const newReport = {
-        id: uuid(),
-        source,
-        amount,
-        created_at: new Date(),
-        updated_at: new Date(),
-        type,
-      };
-
-      data.report.push(newReport);
-
-      return newReport;
+    if (doesTypeExists(type)) {
+      return this.appService.createReport(source, amount, type);
     }
 
     throw notFound;
@@ -68,42 +54,21 @@ export class AppController {
 
   @Put(':id')
   UpdateReportById(
-    @Param('type') type: string,
+    @Param('type') type: ReportType,
     @Param('id') id: string,
     @Body() { amount, source }: { amount: number; source: string },
   ) {
-    if (type === ReportType.INCOME || type === ReportType.EXPENSE) {
-      const updatedReport = data.report.map((item, index) => {
-        if (item.id === id) {
-          const newReport = {
-            ...item,
-            source: source ? source : item.source,
-            amount: amount ? amount : item.amount,
-            updated_at: new Date(),
-          };
-
-          return newReport;
-        }
-
-        return item;
-      });
-
-      data.report = updatedReport;
-      return data.report;
+    if (doesTypeExists(type)) {
+      return this.appService.updateReportById(id, amount, source);
     }
 
     throw notFound;
   }
 
   @Delete(':id')
-  DeleteReportById(@Param('type') type: string, @Param('id') id: string) {
-    if (type === ReportType.INCOME || type === ReportType.EXPENSE) {
-      const updatedReport = data.report.filter((item) => {
-        return item.id !== id;
-      });
-
-      data.report = updatedReport;
-      return data.report;
+  DeleteReportById(@Param('type') type: ReportType, @Param('id') id: string) {
+    if (doesTypeExists(type)) {
+      return this.appService.deleteReportById(id);
     }
 
     throw notFound;
