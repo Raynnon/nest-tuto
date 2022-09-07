@@ -2,6 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { data, ReportType } from './data';
 import { v4 as uuid } from 'uuid';
 
+interface ReportData {
+  source: string;
+  amount: number;
+}
+
 @Injectable()
 export class AppService {
   getAllReports(type: ReportType) {
@@ -16,7 +21,7 @@ export class AppService {
     });
   }
 
-  createReport(source: string, amount: number, type: ReportType) {
+  createReport({ amount, source }: ReportData, type: ReportType) {
     const newReport = {
       id: uuid(),
       source,
@@ -31,7 +36,7 @@ export class AppService {
     return newReport;
   }
 
-  updateReportById(id: string, amount: number, source: string) {
+  updateReportById(id: string, { amount, source }: ReportData) {
     const updatedReport = data.report.map((item) => {
       if (item.id === id) {
         const newReport = {
