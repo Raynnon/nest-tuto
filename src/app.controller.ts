@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ReportType } from './data';
-import { CreateReportDto } from './dtos/report.dto';
+import { CreateReportDto, UpdateReportDto } from './dtos/report.dto';
 
 const doesTypeExists = (type: ReportType): boolean => {
   return Object.values(ReportType).includes(type) ? true : false;
@@ -54,10 +54,10 @@ export class AppController {
   updateReportById(
     @Param('type', new ParseEnumPipe(ReportType)) type: ReportType,
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() { amount, source }: { amount: number; source: string },
+    @Body() body: UpdateReportDto,
   ) {
     if (doesTypeExists(type)) {
-      return this.appService.updateReportById(id, { amount, source });
+      return this.appService.updateReportById(id, body);
     }
   }
 
